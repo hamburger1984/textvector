@@ -26,5 +26,42 @@ namespace TextVector.Tests
             var parsed = parser.Parse(lines, m => _output.WriteLine(m));
 
         }
+
+
+        [Fact]
+        public void LoadIntoBuffer()
+        {
+            var buffer = new TextBuffer(File.ReadAllLines("./Samples/testbox.txt"));
+
+            Assert.Equal(new[]
+            {
+                '\0', ' ', ' ',
+                '\0', '<', '-',
+                '\0', ' ', ' '
+            }, buffer.Neighborhood(0, 14));
+
+            Assert.Equal(new[]
+            {
+                '\0','\0','\0',
+                '>', ' ', '\0',
+                ' ', ' ', '\0'
+            }, buffer.Neighborhood(42, 0));
+
+            Assert.Equal('0', buffer[15, 32]);
+            Assert.Equal(new[]
+            {
+                '.', '─', '.',
+                ' ', '0', ' ',
+                '`', '-', '\''
+            }, buffer.Neighborhood(15, 32));
+            Assert.Equal(new[]
+            {
+                ' ', ' ', ' ', ' ', ' ',
+                ' ', '.', '─', '.', ' ',
+                '(', ' ', '0', ' ', ')',
+                ' ', '`', '-', '\'', ' ',
+                ' ', ' ', ' ', ' ', ' '
+            }, buffer.Neighborhood(15, 32, 2));
+        }
     }
 }

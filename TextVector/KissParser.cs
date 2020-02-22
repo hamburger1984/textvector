@@ -2,35 +2,51 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace TextVector
 {
     public class KissParser
     {
+        private readonly Dictionary<int, Dictionary<int, string>> description = new Dictionary<int, Dictionary<int, string>>();
+        private readonly Dictionary<int, Dictionary<int, ImageEntity>> entities = new Dictionary<int, Dictionary<int, ImageEntity>>();
+        private int width = 0;
+        private int height = 0;
+        private int cellWidth = 8;
+        private int cellHeight = 16;
+
         public KissParser() { }
 
         public IEnumerable<ImageEntity> Parse(IEnumerable<string> lines, Action<string>? outputWriter = null)
         {
-            var description = new Dictionary<int, Dictionary<int, string>>();
-            var width = 0;
-            var height = 0;
+            description.Clear();
+            entities.Clear();
 
-            var y = 0;
+            width = 0;
+            height = 0;
 
             foreach (var line in lines)
             {
                 var trimmed = line.TrimEnd(' ', '\t', '\n', '\r');
                 width = Math.Max(trimmed.Length, width);
+                DescribeLine(trimmed, height);
                 height++;
-
-                description[y] = DescribeLine(trimmed);
-                y++;
-
             }
-            outputWriter?.Invoke($"Text is {width} x {height}.");
 
-            for (y = 0; y < height; y++)
+            if (outputWriter != null)
+            {
+                outputWriter($"Text is {width} x {height}.");
+                DumpDescription(outputWriter);
+            }
+
+
+            return entities.SelectMany(l => l.Value).Select(p => p.Value);
+        }
+
+        private void DumpDescription(Action<string> outputWriter)
+        {
+            for (var y = 0; y < height; y++)
             {
                 var line = new StringBuilder();
                 var d = description[y];
@@ -39,21 +55,12 @@ namespace TextVector
                 {
                     line.AppendFormat(" {0,4}", d.ContainsKey(x) ? d[x] : "");
                 }
-                outputWriter?.Invoke(line.ToString());
+
+                outputWriter.Invoke(line.ToString());
             }
-
-
-            //var y = 0;
-            //foreach (var line in lines)
-            //{
-            //    var lastLine = y > 0 ? description[y - 1] : null;
-
-            //}
-            return Enumerable.Empty<ImageEntity>();
-
         }
 
-        private Dictionary<int, string> DescribeLine(string line)
+        private void DescribeLine(string line, int y)
         {
             var lineDescription = new Dictionary<int, string>();
             var chars = line.ToCharArray();
@@ -124,19 +131,94 @@ namespace TextVector
                 }
             }
 
-            return lineDescription;
+            description[y] = lineDescription;
         }
+
+
+    }
+
+    public class TextBuffer
+    {
+        public TextBuffer(IReadOnlyList<string> lines)
+        {
+            Height = lines.Count;
+            Width = lines.Select(l => l.Length).Max();
+
+            buffer = new char[Width * Height];
+
+            for (var y = 0; y < Height; y++)
+            {
+                var lineLength = lines[y].Length;
+                Array.Copy(lines[y].ToCharArray(), 0, buffer, y * Width, lineLength);
+                if (lineLength < Width)
+                {
+                    Array.Fill(buffer, ' ', y * Width + lineLength, Width - lineLength);
+                }
+            }
+        }
+
+        private readonly char[] buffer;
+
+        public int Height { get; }
+        public int Width { get; }
+
+        public char this[int x, int y]
+        {
+            get => RangeCheck(x, y) ? buffer[y * Width + x] : '\0';
+            set
+            {
+                if (RangeCheck(x, y))
+                    buffer[y * Width + x] = value;
+            }
+        }
+
+        public bool RangeCheck(int x, int y)
+        {
+            return x >= 0 && x < Width && y >= 0 && y < Height;
+        }
+
+        public char[] Neighborhood(int x, int y, int distance = 1)
+        {
+            var result = new char[(distance * 2 + 1) * (distance * 2 + 1)];
+            var index = 0;
+
+            for (var row = y - distance; row <= y + distance; row++)
+                for (var column = x - distance; column <= x + distance; column++)
+                    result[index++] = this[column, row];
+
+
+            return result;
+        }
+
     }
 
 
 
     public readonly struct ImageEntity
     {
+        public static ImageEntity Text(int x, int y, string content, bool bold = false, bool emph = false)
+        {
+            return new ImageEntity(EntityKind.Text, x, y, content, "text" + (bold ? " .bold" : "") + (emph ? " .emph" : ""));
+        }
+
+        public ImageEntity(EntityKind kind, int x, int y, string? content = null, string? classes = null)
+        {
+            Kind = kind;
+            X = x;
+            Y = y;
+            Classes = classes;
+            Content = content;
+        }
 
         public EntityKind Kind { get; }
+        public int X { get; }
+        public int Y { get; }
+        public string? Classes { get; }
+        public string? Content { get; }
     }
 
     public enum EntityKind
     {
+        Text
     }
 }
