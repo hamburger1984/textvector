@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 
 namespace TextVector.Tests
 {
@@ -59,6 +56,50 @@ line (3,2,|) to (3,3,|)
 
             Assert.Equal(
                 @"line (0,0,+) to (3,0,+) to (3,0,+) to (3,3,+) to (3,3,+) to (0,3,+) to (0,3,+) to (0,1,|)
+", parsed);
+        }
+
+        [Fact]
+        public void Forks()
+        {
+            var lines = new[]
+            {
+                "  |",
+                " /|\\",
+                "/ | \\"
+                //"",
+                //"  .--",
+                //" /---",
+                //"-----",
+                //"  \\",
+                //"   \\",
+                //"    \\"
+            };
+            var p = new SmallParser(lines);
+            var parsed = p.Parse();
+
+            Assert.Equal(
+                @"line (2,0,|) to (2,1,|) to (2,1,|) to (2,2,|)
+", parsed);
+
+        }
+
+
+        [Fact]
+        public void Spiral()
+        {
+            var lines = new[]
+            {
+                "----.",
+                " .- | ",
+                " |  | ",
+                " '--' "
+            };
+            var p = new SmallParser(lines);
+            var parsed = p.Parse();
+
+            Assert.Equal(
+                @"line (0,0,-) to (4,0,.) to (4,0,.) to (4,3,') to (4,3,') to (1,3,') to (1,3,') to (1,1,.) to (1,1,.) to (2,1,-)
 ", parsed);
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -97,10 +96,17 @@ namespace TextVector
                 next = TraceRight(x + 1, y, _buffer[x + 1, y]);
             if (direction == (Direction.Horizontal | Direction.Left))
                 next = TraceLeft(x - 1, y, _buffer[x - 1, y]);
+
             if (direction == (Direction.Vertical | Direction.Down))
                 next = TraceDown(x, y + 1, _buffer[x, y + 1]);
             if (direction == (Direction.Vertical | Direction.Up))
                 next = TraceUp(x, y - 1, _buffer[x, y - 1]);
+
+            if (direction == (Direction.Diagonal | Direction.Right | Direction.Down))
+                next = TraceDiagRD(x + 1, y + 1, _buffer[x + 1, y + 1]);
+            if (direction == (Direction.Diagonal | Direction.Left | Direction.Down))
+                next = TraceDiagLD(x - 1, y + 1, _buffer[x - 1, y + 1]);
+
 
             if (next != null)
             {
@@ -208,7 +214,7 @@ namespace TextVector
         public Tuple<int, int, char> TraceDown(int x, int y, char c)
         {
             // Node, bend
-            if (c == '*' || c == '+' || c == '/' || c == '\\')
+            if (c == '*' || c == '+' || c == '/' || c == '\\' || c == '\'')
             {
                 _buffer[x, y] = ' ';
                 return new Tuple<int, int, char>(x, y, c);
@@ -227,7 +233,7 @@ namespace TextVector
 
             var next = _buffer[x, y + 1];
 
-            if (next == '|' || next == '*' || next == '+' || next == '/' || next == '\\')
+            if (next == '|' || next == '*' || next == '+' || next == '/' || next == '\\' || next == '\'')
             {
                 _buffer[x, y] = ' ';
                 return TraceDown(x, y + 1, next);
@@ -240,7 +246,7 @@ namespace TextVector
         public Tuple<int, int, char> TraceUp(int x, int y, char c)
         {
             // Node, bend
-            if (c == '*' || c == '+' || c == '/' || c == '\\')
+            if (c == '*' || c == '+' || c == '/' || c == '\\' || c == '.')
             {
                 _buffer[x, y] = ' ';
                 return new Tuple<int, int, char>(x, y, c);
@@ -259,10 +265,71 @@ namespace TextVector
 
             var next = _buffer[x, y - 1];
 
-            if (next == '|' || next == '*' || next == '+' || next == '/' || next == '\\')
+            if (next == '|' || next == '*' || next == '+' || next == '/' || next == '\\' || next == '.')
             {
                 _buffer[x, y] = ' ';
                 return TraceUp(x, y - 1, next);
+            }
+
+            _buffer[x, y] = ' ';
+            return new Tuple<int, int, char>(x, y, c);
+        }
+
+        private Tuple<int, int, char> TraceDiagRD(int x, int y, char c)
+        {
+            // Node, bend
+            if (c == '*' || c == '+' || c == '|' || c == '-' || c == '\'')
+            {
+                _buffer[x, y] = ' ';
+                return new Tuple<int, int, char>(x, y, c);
+            }
+
+            // Fork
+            if (c == '\\' &&
+                (_buffer[x - 1, y] == '-' ||
+                _buffer[x - 1, y] == '/' ||
+                _buffer[x + 1, y] == '-'))
+            {
+                _buffer[x, y] = ' ';
+                return new Tuple<int, int, char>(x, y, c);
+            }
+
+            var next = _buffer[x + 1, y + 1];
+
+            if (next == '\\' || next == '*' || next == '+' || next == '|' || next == '-' || next == '\'')
+            {
+                _buffer[x, y] = ' ';
+                return TraceDiagRD(x + 1, y + 1, next);
+            }
+
+            _buffer[x, y] = ' ';
+            return new Tuple<int, int, char>(x, y, c);
+        }
+        private Tuple<int, int, char> TraceDiagLD(int x, int y, char c)
+        {
+            // Node, bend
+            if (c == '*' || c == '+' || c == '|' || c == '-' || c == '\'')
+            {
+                _buffer[x, y] = ' ';
+                return new Tuple<int, int, char>(x, y, c);
+            }
+
+            // Fork
+            if (c == '\\' &&
+                (_buffer[x - 1, y] == '-' ||
+                _buffer[x - 1, y] == '\\' ||
+                _buffer[x + 1, y] == '-'))
+            {
+                _buffer[x, y] = ' ';
+                return new Tuple<int, int, char>(x, y, c);
+            }
+
+            var next = _buffer[x - 1, y + 1];
+
+            if (next == '/' || next == '*' || next == '+' || next == '|' || next == '-' || next == '\'')
+            {
+                _buffer[x, y] = ' ';
+                return TraceDiagLD(x - 1, y + 1, next);
             }
 
             _buffer[x, y] = ' ';
