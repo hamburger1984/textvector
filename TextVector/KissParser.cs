@@ -137,62 +137,6 @@ namespace TextVector
 
     }
 
-    public class TextBuffer
-    {
-        public TextBuffer(IReadOnlyList<string> lines)
-        {
-            Height = lines.Count;
-            Width = lines.Select(l => l.Length).Max();
-
-            buffer = new char[Width * Height];
-
-            for (var y = 0; y < Height; y++)
-            {
-                var lineLength = lines[y].Length;
-                Array.Copy(lines[y].ToCharArray(), 0, buffer, y * Width, lineLength);
-                if (lineLength < Width)
-                {
-                    Array.Fill(buffer, ' ', y * Width + lineLength, Width - lineLength);
-                }
-            }
-        }
-
-        private readonly char[] buffer;
-
-        public int Height { get; }
-        public int Width { get; }
-
-        public char this[int x, int y]
-        {
-            get => RangeCheck(x, y) ? buffer[y * Width + x] : '\0';
-            set
-            {
-                if (RangeCheck(x, y))
-                    buffer[y * Width + x] = value;
-            }
-        }
-
-        public bool RangeCheck(int x, int y)
-        {
-            return x >= 0 && x < Width && y >= 0 && y < Height;
-        }
-
-        public char[] Neighborhood(int x, int y, int distance = 1)
-        {
-            var result = new char[(distance * 2 + 1) * (distance * 2 + 1)];
-            var index = 0;
-
-            for (var row = y - distance; row <= y + distance; row++)
-                for (var column = x - distance; column <= x + distance; column++)
-                    result[index++] = this[column, row];
-
-
-            return result;
-        }
-
-    }
-
-
 
     public readonly struct ImageEntity
     {
