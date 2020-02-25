@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -39,27 +40,12 @@ namespace TextVector
                     var c = _buffer[x, y];
                     if (_lineChars.Contains(c))
                     {
-                        var nodes = new Stack<Node>();
-                        nodes.Push(new Node(x, y, c));
 
-                        while (nodes.Any())
-                        {
-                            var node = nodes.Pop();
-                            foreach (var direction in LinesFrom(x, y, c))
-                            {
-                                var next = TraceLine(x, y, direction);
-                                if (next != null)
-                                {
-                                    var n = next.Value;
-                                    messages.AppendLine($"({x},{y},{c}) to ({n.X},{n.Y},{n.C})");
-                                    node.Nodes.Add(n);
-                                    nodes.Push(n);
-                                }
-                            }
+                        var node = new Node(x, y, c);
+                        TraceFrom(node);
 
-                            if (node.Nodes.Any())
-                                _figures.Add(node);
-                        }
+                        if (node.Nodes.Any())
+                            _figures.Add(node);
                     }
                 }
 
@@ -74,27 +60,43 @@ namespace TextVector
             return result.ToString();
         }
 
+        private void TraceFrom(Node node)
+        {
+            foreach (var direction in LinesFrom(node.X, node.Y, node.C))
+            {
+                var next = TraceLine(node.X, node.Y, node.C, direction);
+                if (next != null)
+                {
+                    var n = next.Value;
+                    node.Nodes.Add(n);
+                    TraceFrom(n);
+                }
+            }
+        }
+
+
         private void DumpGraph(StringBuilder sb, string prefix, Node node)
         {
             sb.AppendLine($"{prefix} ({node.X},{node.Y},{node.C})");
 
+            var isFork = (node.Nodes.Count > 1);
             var i = 1;
             foreach (var n in node.Nodes)
-                DumpGraph(sb, $"{prefix}.{i++}", n);
+                DumpGraph(sb, isFork ? $"{prefix}.{i++}" : prefix, n);
         }
 
-        private Node? TraceLine(int x, int y, TraceDirection direction)
+        private Node? TraceLine(int x, int y, char c, TraceDirection direction)
         {
             _buffer.SetTaken(x, y);
 
-            if (direction.HasFlag(TraceDirection.Horizontal)) return TraceHorizontal(x, y, direction.HasFlag(TraceDirection.Right));
-            if (direction.HasFlag(TraceDirection.Vertical)) return TraceVertical(x, y, direction.HasFlag(TraceDirection.Down));
-            if (direction.HasFlag(TraceDirection.Diagonal)) return TraceDiagonal(x, y, direction.HasFlag(TraceDirection.Right), direction.HasFlag(TraceDirection.Down));
+            if (direction.HasFlag(TraceDirection.Horizontal)) return TraceHorizontal(x, y, c, direction.HasFlag(TraceDirection.Right));
+            if (direction.HasFlag(TraceDirection.Vertical)) return TraceVertical(x, y, c, direction.HasFlag(TraceDirection.Down));
+            if (direction.HasFlag(TraceDirection.Diagonal)) return TraceDiagonal(x, y, c, direction.HasFlag(TraceDirection.Right), direction.HasFlag(TraceDirection.Down));
             return null;
 
         }
 
-        private Node? TraceHorizontal(int x, int y, bool right)
+        private Node? TraceHorizontal(int x, int y, char c, bool right)
         {
             // step
             x = right ? x + 1 : x - 1;
@@ -114,17 +116,20 @@ namespace TextVector
             {
                 _buffer.SetTaken(x, y);
 
+                //if (c != next)
+                //    return new Node(x, y, next);
+
                 // Fork
                 if (LinesFrom(x, y, next).Count() > 1)
                     return new Node(x, y, next);
 
                 // keep going
-                return TraceHorizontal(x, y, right) ?? new Node(x, y, next);
+                return TraceHorizontal(x, y, next, right) ?? new Node(x, y, next);
             }
 
             return null;
         }
-        private Node? TraceVertical(int x, int y, bool down)
+        private Node? TraceVertical(int x, int y, char c, bool down)
         {
             // step
             y = down ? y + 1 : y - 1;
@@ -134,7 +139,8 @@ namespace TextVector
             var next = _buffer[x, y];
 
             // Node, bend
-            if (next == '*' || next == '+' || next == '/' || next == '\\' || next == '\'')
+            if (next == '*' || next == '+' || next == '/' || next == '\\' || next == '\'' ||
+                (down && next == '\'') || (!down && next == '.'))
             {
                 _buffer.SetTaken(x, y);
                 return new Node(x, y, next);
@@ -144,20 +150,54 @@ namespace TextVector
             {
                 _buffer.SetTaken(x, y);
 
+                //if (c != next)
+                //    return new Node(x, y, next);
+
                 // Fork
                 if (LinesFrom(x, y, next).Count() > 1)
                     return new Node(x, y, next);
 
                 // keep going
-                return TraceVertical(x, y, down) ?? new Node(x, y, next);
+                return TraceVertical(x, y, next, down) ?? new Node(x, y, next);
             }
 
             return null;
         }
 
-        private Node? TraceDiagonal(int x, int y, bool right, bool down)
+        private Node? TraceDiagonal(int x, int y, char c, bool right, bool down)
         {
-            throw new NotImplementedException();
+            // step
+            x = right ? x + 1 : x - 1;
+            y = down ? y + 1 : y - 1;
+
+            if (_buffer.IsTaken(x, y)) return null;
+
+            var next = _buffer[x, y];
+
+            // Node, bend
+            if (next == '*' || next == '+' ||
+                (down && next == '\'') || (!down && next == '.'))
+            {
+                _buffer.SetTaken(x, y);
+                return new Node(x, y, next);
+            }
+
+            if ((down == right && next == '\\') || (down != right && next == '/'))
+            {
+                _buffer.SetTaken(x, y);
+
+                //if (c != next)
+                //    return new Node(x, y, next);
+
+                // Fork
+                if (LinesFrom(x, y, next).Count() > 1)
+                    return new Node(x, y, next);
+
+                // keep going
+                return TraceDiagonal(x, y, next, right, down) ?? new Node(x, y, next);
+            }
+
+            return null;
         }
 
         private IEnumerable<TraceDirection> LinesFrom(int x, int y, char c)
