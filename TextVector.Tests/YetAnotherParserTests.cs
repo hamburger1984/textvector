@@ -8,7 +8,7 @@ namespace TextVector.Tests
         {
             var p = new YetAnotherParser(lines);
 
-            var parsed = p.Parse();
+            var parsed = p.ParseToText();
             Assert.Equal(expected, parsed);
         }
 
@@ -63,7 +63,95 @@ namespace TextVector.Tests
         }
 
         [Fact]
-        public void Box()
+        public void GridRounded()
+        {
+            var expected =
+                @"1 (0,0,.)
+1 (2,0,-)
+1 (4,0,.)
+1 (4,2,|)
+1 (4,4,|)
+1 (4,6,')
+1 (2,6,-)
+1 (2,4,|)
+1 (2,2,|)
+1.1 (2,0,-)
+1.2 (4,2,|)
+1.3 (0,2,|)
+1.3.1 (0,0,.)
+1.3.2 (0,4,|)
+1.3.2.1 (2,4,|)
+1.3.2.1 (4,4,|)
+1.3.2.2 (0,6,')
+1.3.2.2 (2,6,-)
+";
+            var lines = new[]
+            {
+
+                ".---.",
+                "| | |",
+                "|-|-|",
+                "| | |",
+                "|-|-|",
+                "| | |",
+                "'---'"
+            };
+            TestLines(expected, lines);
+
+        }
+
+        [Fact]
+        public void GridWithCorners()
+        {
+            var expected = @"1 (0,0,+)
+1 (3,0,+)
+1 (5,0,+)
+1 (5,3,+)
+1 (5,5,+)
+1 (3,5,+)
+1 (3,3,+)
+1.1 (3,0,+)
+1.2 (5,3,+)
+1.3 (0,3,+)
+1.3.1 (0,0,+)
+1.3.2 (0,5,+)
+1.3.2 (3,5,+)
+";
+            var lines = new[]
+            {
+                "+--+-+",
+                "|  | |",
+                "|  | |",
+                "+--+-+",
+                "|  | |",
+                "+--+-+"
+            };
+            TestLines(expected, lines);
+        }
+
+
+        [Fact]
+        public void BoxRounded()
+        {
+            var expected = @"1 (0,0,.)
+1 (4,0,.)
+1 (4,3,')
+1 (0,3,')
+1 (0,0,.)
+";
+            var lines = new[]
+            {
+                ".---.",
+                "|   |",
+                "|   |",
+                "'---'"
+            };
+            TestLines(expected, lines);
+        }
+
+
+        [Fact]
+        public void BoxWithCorners()
         {
             var expected = @"1 (0,0,+)
 1 (3,0,+)
