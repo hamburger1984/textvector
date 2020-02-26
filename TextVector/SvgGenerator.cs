@@ -1,55 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Xml.Linq;
+using Microsoft.Extensions.FileProviders;
 
 namespace TextVector
 {
     public class SvgGenerator
     {
-        //public SvgGenerator(int width, int height, int )
+        private const int SvgCellWidth = 12;
+        private const int SvgCellHeight = 16;
+        //private const int SvgHalfCellWidth = 3;
+        //private const int SvgHalfCellHeight = 4;
+
+        static SvgGenerator()
+        {
+            (StyleCssContent, DefXmlContent) = LoadResources("svg_style.css", "svg_def.xml");
+        }
+
+        private static string DefXmlContent { get; }
+        private static string StyleCssContent { get; }
+
+        private static (string, string) LoadResources(string fileName1, string fileName2)
+        {
+            var embeddedProvider = new EmbeddedFileProvider(Assembly.GetExecutingAssembly());
+            using var reader1 = new StreamReader(embeddedProvider.GetFileInfo(fileName1).CreateReadStream());
+            using var reader2 = new StreamReader(embeddedProvider.GetFileInfo(fileName2).CreateReadStream());
+            return (reader1.ReadToEnd(), reader2.ReadToEnd());
+        }
 
         public string ToSvg(IEnumerable<Node> nodes, int width, int height)
         {
-
             var doc = new XDocument();
-            XNamespace ns = ("http://www.w3.org/2000/svg");
+            XNamespace ns = "http://www.w3.org/2000/svg";
             var svg = new XElement(ns + "svg",
-                new XAttribute("width", $"{SvgCellWidth * width}"),
-                new XAttribute("height", $"{SvgCellHeight * height}"));
+                new XAttribute("width", $"{SvgCellWidth * (width + 2)}"),
+                new XAttribute("height", $"{SvgCellHeight * (height + 2)}"));
             doc.Add(svg);
 
-            var defs = new XElement(ns + "defs");
-            BuildSvgDefs(defs, ns);
-            svg.Add(defs);
+            var def = XElement.Parse(DefXmlContent);
+            svg.Add(def);
 
             var style = new XElement(ns + "style",
-                new XAttribute("type", "text/css"));
-            var styleContent = new XCData(@"
-line, path {
-    fill: none;
-    fill-opacity: 1;
-    stroke: black;
-    stoke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: miter;
-    stroke-opacity: 1;
-}
-.end-arrow{
-    marker-end: url(#arrow);
-}
-.start-arrow{
-    marker-start: url(#arrow);
-}
-.end-arrow-reverse{
-    marker-end: url(#arrow-reverse);
-}
-.start-arrow-reverse{
-    marker-start: url(#arrow-reverse);
-}
-
-");
-            style.Add(styleContent);
+                new XAttribute("type", "text/css"),
+                new XCData(StyleCssContent));
             svg.Add(style);
 
             foreach (var figure in nodes)
@@ -71,31 +65,48 @@ line, path {
             return doc.ToString();
         }
 
-        private void BuildSvgDefs(XElement defs, XNamespace ns)
-        {
-            defs.Add(new XElement(ns + "marker",
-                new XAttribute("id", "arrow"),
-                new XAttribute("markerHeight", "7"),
-                new XAttribute("markerWidth", "7"),
-                new XAttribute("orient", "auto-start-reverse"),
-                new XAttribute("refX", "4"),
-                new XAttribute("refY", "2"),
-                new XAttribute("viewBox", "-2 -2 8 8"),
-                new XElement(ns + "polygon",
-                    new XAttribute("points", "0,0 0,4 4,2 0,0"))
-                ),
-                new XElement(ns + "marker",
-                new XAttribute("id", "arrow-reverse"),
-                new XAttribute("markerHeight", "7"),
-                new XAttribute("markerWidth", "7"),
-                new XAttribute("orient", "auto-start-reverse"),
-                new XAttribute("refX", "4"),
-                new XAttribute("refY", "2"),
-                new XAttribute("viewBox", "-2 -2 8 8"),
-                new XElement(ns + "polygon",
-                    new XAttribute("points", "4,0 4,4 0,2 4,0"))
-                ));
-        }
+        //private void BuildSvgDefs(XElement defs, XNamespace ns)
+        //{
+        //    var markers = @"";
+        //    defs.Add(XElement.Parse(markers));
+        //    //defs.Add(new XElement(ns + "marker",
+        //    //        new XAttribute("id", "arrow"),
+        //    //        new XAttribute("markerHeight", "7"),
+        //    //        new XAttribute("markerWidth", "7"),
+        //    //        new XAttribute("orient", "auto-start-reverse"),
+        //    //        new XAttribute("refX", "4"),
+        //    //        new XAttribute("refY", "2"),
+        //    //        new XAttribute("viewBox", "-2 -2 8 8"),
+        //    //        new XElement(ns + "polygon",
+        //    //            new XAttribute("points", "0,0 0,4 4,2 0,0"))
+        //    //    ),
+        //    //    new XElement(ns + "marker",
+        //    //        new XAttribute("id", "arrow-reverse"),
+        //    //        new XAttribute("markerHeight", "7"),
+        //    //        new XAttribute("markerWidth", "7"),
+        //    //        new XAttribute("orient", "auto-start-reverse"),
+        //    //        new XAttribute("refX", "4"),
+        //    //        new XAttribute("refY", "2"),
+        //    //        new XAttribute("viewBox", "-2 -2 8 8"),
+        //    //        new XElement(ns + "polygon",
+        //    //            new XAttribute("points", "4,0 4,4 0,2 4,0"))
+        //    //    ),
+        //    //    new XElement(ns + "marker",
+        //    //        new XAttribute("id", "circle-filled"),
+        //    //        new XAttribute("markerHeight", "7"),
+        //    //        new XAttribute("markerWidth", "7"),
+        //    //        new XAttribute("orient", "auto-start-reverse"),
+        //    //        new XAttribute("refX", "4"),
+        //    //        new XAttribute("refY", "4"),
+        //    //        new XAttribute("viewBox", "0 0 8 8"),
+        //    //        new XElement(ns + "circle",
+        //    //            new XAttribute("class", "filled"),
+        //    //            new XAttribute("cx", "4"),
+        //    //            new XAttribute("cy", "4"),
+        //    //            new XAttribute("r", "2"))
+        //    //    )
+        //    //);
+        //}
 
         private void NodeToSvg(XContainer el, XNamespace ns, Node node)
         {
@@ -107,19 +118,14 @@ line, path {
 
                 el.Add(new XElement(ns + "line",
                     new XAttribute("class", classes),
-                    new XAttribute("x1", SvgHalfCellWidth + node.X * SvgCellWidth),
-                    new XAttribute("y1", SvgHalfCellHeight + node.Y * SvgCellHeight),
-                    new XAttribute("x2", SvgHalfCellWidth + dest.X * SvgCellWidth),
-                    new XAttribute("y2", SvgHalfCellHeight + dest.Y * SvgCellHeight)));
+                    new XAttribute("x1", (node.X + 1) * SvgCellWidth),
+                    new XAttribute("y1", (node.Y + 1) * SvgCellHeight),
+                    new XAttribute("x2", (dest.X + 1) * SvgCellWidth),
+                    new XAttribute("y2", (dest.Y + 1) * SvgCellHeight)));
 
                 NodeToSvg(el, ns, dest);
             }
         }
-
-        private const int SvgCellWidth = 4;
-        private const int SvgCellHeight = 6;
-        private const int SvgHalfCellWidth = 2;
-        private const int SvgHalfCellHeight = 3;
 
         //private string GenerateSvgPathData(in Node node, int scaleX, int scaleY, bool isFirst = false)
         //{
@@ -146,39 +152,32 @@ line, path {
             var prefix = start ? "start-" : "end-";
 
             if (c == 'o')
-                return prefix + "round-filled";
+                return prefix + "dot";
             if (c == 'O')
-                return prefix + "round-big";
+                return prefix + "O";
             if (c == '*')
-                return prefix + "round-big-filled";
+                return prefix + "big-dot";
             if (c == '>')
-            {
-                if (start && direction.HasFlag(TraceDirection.Right))
+                if (start == direction.HasFlag(TraceDirection.Right))
                     return prefix + "arrow-reverse";
-                if (start && !direction.HasFlag(TraceDirection.Right))
+                else
                     return prefix + "arrow";
-                if (!start && direction.HasFlag(TraceDirection.Right))
-                    return prefix + "arrow";
-                if (!start && !direction.HasFlag(TraceDirection.Right))
-                    return prefix + "arrow-reverse";
-            }
             if (c == '<')
-            {
-                if (start && direction.HasFlag(TraceDirection.Right))
+                if (start == direction.HasFlag(TraceDirection.Right))
                     return prefix + "arrow";
-                if (start && !direction.HasFlag(TraceDirection.Right))
+                else
                     return prefix + "arrow-reverse";
-                if (!start && direction.HasFlag(TraceDirection.Right))
+
+            if (c == 'v' || c == 'V')
+                if (start)
                     return prefix + "arrow-reverse";
-                if (!start && !direction.HasFlag(TraceDirection.Right))
+                else
                     return prefix + "arrow";
-            }
 
-            if (c == 'v')
-                return null;
-
-            if ( c == '^')
+            if (c == '^')
                 if (!start)
+                    return prefix + "arrow-reverse";
+                else
                     return prefix + "arrow";
 
             return null;

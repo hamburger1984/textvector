@@ -7,13 +7,24 @@ namespace TextVector
 {
     public class YetAnotherParser
     {
-        private const string HorizontalLineChars = "-<>";
-        private const string VerticalLineChars = "|v^";
-        private const string DiagonalLineCharsUp = "/v^";
-        private const string DiagonalLineCharsDown = @"\v^";
-        private readonly TextBuffer _buffer;
+        private const string LineChars = @"-|+*/\.'<>vV^oO";
+        private const string LineCharsHorizontal = "-<>oO";
+        private const string LineCharsVerticalUp = "|+vV^.oO";
+        private const string LineCharsVerticalDown = "|+vV^'oO";
+        private const string LineCharsDiagonalDownRight = @"\vV^";
+        private const string LineCharsDiagonalUpRight = "/vV^";
 
-        private const string LineChars = @"-|+*/\.'<>v^oO";
+        private const string TraceNodesHorizontal = @"*+|.'<>oO";
+        private const string TraceNodesVertical = @"*+-/\^vVoO";
+        private const string TraceNodesDiagonal = "+vV^<>-|";
+        private const char TraceDownBend = '\'';
+        private const char TraceUpBend = '.';
+
+        private const char TraceContinueHorizontal = '-';
+        private const char TraceContinueVertical = '|';
+        private const char TraceContinueDiagonalDownRight = '\\';
+        private const char TraceContinueDiagonalUpRight = '/';
+        private readonly TextBuffer _buffer;
 
         public YetAnotherParser(IReadOnlyList<string> lines)
         {
@@ -50,6 +61,7 @@ namespace TextVector
         private IEnumerable<Node> ParseFigures()
         {
             var figureId = 1;
+            var defaultDirection = TraceDirection.Horizontal | TraceDirection.Right;
             for (var y = 0; y < _buffer.Height; y++)
                 for (var x = 0; x < _buffer.Width; x++)
                 {
@@ -58,8 +70,8 @@ namespace TextVector
                     var c = _buffer[x, y];
                     if (LineChars.Contains(c))
                     {
-                        var node = new Node(x, y, figureId, c, TraceDirection.Horizontal | TraceDirection.Right);
-                        TraceFrom(node);
+                        var node = new Node(x, y, figureId, c, defaultDirection);
+                        TraceFrom(node, defaultDirection);
 
                         if (node.Nodes.Any())
                         {
@@ -70,16 +82,16 @@ namespace TextVector
                 }
         }
 
-        private void TraceFrom(Node node)
+        private void TraceFrom(Node node, TraceDirection direction)
         {
-            foreach (var direction in LinesFrom(node.X, node.Y, node.FigureId, node.C))
+            foreach (var nextDirection in LinesFrom(node.X, node.Y, node.FigureId, node.C, direction))
             {
-                var next = TraceLine(node.X, node.Y, node.FigureId, node.C, direction);
+                var next = TraceLine(node.X, node.Y, node.FigureId, node.C, nextDirection);
                 if (next != null)
                 {
                     var n = next.Value;
                     node.Nodes.Add(n);
-                    TraceFrom(n);
+                    TraceFrom(n, nextDirection);
                 }
             }
         }
@@ -87,15 +99,7 @@ namespace TextVector
         private Node? TraceLine(int x, int y, int figureId, char c, TraceDirection direction)
         {
             _buffer.SetFigure(x, y, figureId);
-
-            if (direction.HasFlag(TraceDirection.Horizontal))
-                return TraceHorizontal(x, y, figureId, c, direction.HasFlag(TraceDirection.Right), direction);
-            if (direction.HasFlag(TraceDirection.Vertical))
-                return TraceVertical(x, y, figureId, c, direction.HasFlag(TraceDirection.Down), direction);
-            if (direction.HasFlag(TraceDirection.Diagonal))
-                return TraceDiagonal(x, y, figureId, c, direction.HasFlag(TraceDirection.Right),
-                    direction.HasFlag(TraceDirection.Down), direction);
-            return null;
+            return TraceDirectionalLine(x, y, figureId, direction);
         }
 
         private (bool, Node?) AlreadyTaken(int x, int y, int figureId, char c, TraceDirection direction)
@@ -106,88 +110,18 @@ namespace TextVector
             return (existing != 0, null);
         }
 
-        private Node? TraceHorizontal(int x, int y, int figureId, char c, bool right, TraceDirection direction)
+        private Node? TraceDirectionalLine(int x, int y, int figureId, TraceDirection direction)
         {
+            var down = direction.HasFlag(TraceDirection.Down);
+            var right = direction.HasFlag(TraceDirection.Right);
+            var vertical = direction.HasFlag(TraceDirection.Vertical);
+            var horizontal = direction.HasFlag(TraceDirection.Horizontal);
+
             // step
-            x = right ? x + 1 : x - 1;
-            var next = _buffer[x, y];
-
-            switch (AlreadyTaken(x, y, figureId, next, direction))
-            {
-                case (true, var closingNode):
-                    return closingNode;
-            }
-
-
-            // Node, intersection,  soft bend
-            if (next == '*' || next == '+' || next == '|' || next == '.' || next == '\'' || next == '<' || next == '>')
-            {
-                _buffer.SetFigure(x, y, figureId);
-                return new Node(x, y, figureId, next, direction);
-            }
-
-            if (next == '-')
-            {
-                _buffer.SetFigure(x, y, figureId);
-
-                //if (c != next)
-                //    return new Node(x, y, next);
-
-                // Fork
-                if (LinesFrom(x, y, figureId, next).Count() > 1)
-                    return new Node(x, y, figureId, next, direction);
-
-                // keep going
-                return TraceHorizontal(x, y, figureId, next, right, direction) ?? new Node(x, y, figureId, next, direction);
-            }
-
-            return null;
-        }
-
-        private Node? TraceVertical(int x, int y, int figureId, char c, bool down, TraceDirection direction)
-        {
-            // step
-            y = down ? y + 1 : y - 1;
-            var next = _buffer[x, y];
-
-            switch (AlreadyTaken(x, y, figureId, next, direction))
-            {
-                case (true, var closingNode):
-                    return closingNode;
-            }
-
-            // Node, intersection, soft bend
-            if (next == '*' || next == '+' || next == '-' || next == '/' || next == '\\' || next == '\'' ||
-                down && next == '\'' || !down && next == '.' ||
-                next == '^' || next == 'v')
-            {
-                _buffer.SetFigure(x, y, figureId);
-                return new Node(x, y, figureId, next, direction);
-            }
-
-            if (next == '|')
-            {
-                _buffer.SetFigure(x, y, figureId);
-
-                //if (c != next)
-                //    return new Node(x, y, next);
-
-                // Fork
-                if (LinesFrom(x, y, figureId, next).Count() > 1)
-                    return new Node(x, y, figureId, next, direction);
-
-                // keep going
-                return TraceVertical(x, y, figureId, next, down, direction) ?? new Node(x, y, figureId, next, direction);
-            }
-
-            return null;
-        }
-
-        private Node? TraceDiagonal(int x, int y, int figureId, char c, bool right, bool down, TraceDirection direction)
-        {
-            // step
-            x = right ? x + 1 : x - 1;
-            y = down ? y + 1 : y - 1;
+            if (!vertical)
+                x = right ? x + 1 : x - 1;
+            if (!horizontal)
+                y = down ? y + 1 : y - 1;
 
             var next = _buffer[x, y];
 
@@ -196,60 +130,85 @@ namespace TextVector
                 case (true, var closingNode):
                     return closingNode;
             }
-
 
             // Node, bend
-            if (next == '*' || next == '+' ||
-                down && next == '\'' || !down && next == '.' ||
-                next == 'v' || next == '^' || next == '>' || next == '<' ||
-                next == '-' || next == '|')
+            if (RequiresNode(next, down, horizontal, vertical))
             {
                 _buffer.SetFigure(x, y, figureId);
                 return new Node(x, y, figureId, next, direction);
             }
 
-            if (down == right && next == '\\' || down != right && next == '/')
-            {
-                _buffer.SetFigure(x, y, figureId);
+            if (!ContinueTracing(next, down, right, horizontal, vertical)) return null;
 
-                //if (c != next)
-                //    return new Node(x, y, next);
+            _buffer.SetFigure(x, y, figureId);
 
-                // Fork
-                if (LinesFrom(x, y, figureId, next).Count() > 1)
-                    return new Node(x, y, figureId, next, direction);
+            // don't know...
+            //if (c != next)
+            //    return new Node(x, y, next);
 
-                // keep going
-                return TraceDiagonal(x, y, figureId, next, right, down, direction) ?? new Node(x, y, figureId, next, direction);
-            }
+            // Fork (>1 outgoing lines)
+            if (LinesFrom(x, y, figureId, next, direction).Skip(1).Any())
+                return new Node(x, y, figureId, next, direction);
 
-            return null;
+            // keep going
+            return TraceDirectionalLine(x, y, figureId, direction) ??
+                   new Node(x, y, figureId, next, direction);
         }
 
-        private IEnumerable<TraceDirection> LinesFrom(int x, int y, int figureId, char c)
+        private bool ContinueTracing(in char next, in bool down, in bool right, in bool horizontal, in bool vertical)
         {
-            if (_buffer.IsFigure(x, y - 1) == 0 && VerticalLineChars.Contains(_buffer[x, y - 1]))
+            if (horizontal)
+                return next == TraceContinueHorizontal;
+
+            if (vertical)
+                return next == TraceContinueVertical;
+
+            // diagonal
+            return down == right && next == TraceContinueDiagonalDownRight ||
+                   down != right && next == TraceContinueDiagonalUpRight;
+        }
+
+
+        private bool RequiresNode(in char next, in bool down, in bool horizontal, in bool vertical)
+        {
+            if (horizontal)
+                return TraceNodesHorizontal.Contains(next);
+
+            if (vertical)
+                return TraceNodesVertical.Contains(next) ||
+                       down && next == TraceDownBend ||
+                       !down && next == TraceUpBend;
+
+            // diagonal
+            return TraceNodesDiagonal.Contains(next) ||
+                   down && next == TraceDownBend ||
+                   !down && next == TraceUpBend;
+        }
+
+        private IEnumerable<TraceDirection> LinesFrom(int x, int y, int figureId, char c, TraceDirection direction)
+        {
+            if (_buffer.IsFigure(x, y - 1) == 0 && c != '.' && LineCharsVerticalUp.Contains(_buffer[x, y - 1]))
                 yield return TraceDirection.Vertical | TraceDirection.Up;
 
-            if (_buffer.IsFigure(x + 1, y - 1) == 0 && DiagonalLineCharsUp.Contains(_buffer[x + 1, y - 1]))
+            if (_buffer.IsFigure(x + 1, y - 1) == 0 && LineCharsDiagonalUpRight.Contains(_buffer[x + 1, y - 1]))
                 yield return TraceDirection.Diagonal | TraceDirection.Right | TraceDirection.Up;
 
-            if (_buffer.IsFigure(x + 1, y) == 0 && HorizontalLineChars.Contains(_buffer[x + 1, y]))
+            if (_buffer.IsFigure(x + 1, y) == 0 && LineCharsHorizontal.Contains(_buffer[x + 1, y]))
                 yield return TraceDirection.Horizontal | TraceDirection.Right;
 
-            if (_buffer.IsFigure(x + 1, y + 1) == 0 && DiagonalLineCharsDown.Contains(_buffer[x + 1, y + 1]))
+            if (_buffer.IsFigure(x + 1, y + 1) == 0 && LineCharsDiagonalDownRight.Contains(_buffer[x + 1, y + 1]))
                 yield return TraceDirection.Diagonal | TraceDirection.Right | TraceDirection.Down;
 
-            if (_buffer.IsFigure(x, y + 1) == 0 && VerticalLineChars.Contains(_buffer[x, y + 1]))
+            if (_buffer.IsFigure(x, y + 1) == 0 && c != '\'' && LineCharsVerticalDown.Contains(_buffer[x, y + 1]))
                 yield return TraceDirection.Vertical | TraceDirection.Down;
 
-            if (_buffer.IsFigure(x - 1, y + 1) == 0 && DiagonalLineCharsUp.Contains(_buffer[x - 1, y + 1]))
+            if (_buffer.IsFigure(x - 1, y + 1) == 0 && LineCharsDiagonalUpRight.Contains(_buffer[x - 1, y + 1]))
                 yield return TraceDirection.Diagonal | TraceDirection.Left | TraceDirection.Down;
 
-            if (_buffer.IsFigure(x - 1, y) == 0 && HorizontalLineChars.Contains(_buffer[x - 1, y]))
+            if (_buffer.IsFigure(x - 1, y) == 0 && LineCharsHorizontal.Contains(_buffer[x - 1, y]))
                 yield return TraceDirection.Horizontal | TraceDirection.Left;
 
-            if (_buffer.IsFigure(x - 1, y - 1) == 0 && DiagonalLineCharsDown.Contains(_buffer[x - 1, y - 1]))
+            if (_buffer.IsFigure(x - 1, y - 1) == 0 && LineCharsDiagonalDownRight.Contains(_buffer[x - 1, y - 1]))
                 yield return TraceDirection.Diagonal | TraceDirection.Left | TraceDirection.Up;
 
             /*

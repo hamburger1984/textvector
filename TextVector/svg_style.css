@@ -1,0 +1,33 @@
+﻿line, path, circle, rect, polygon {
+    fill: none;
+    fill-opacity: 1;
+    stroke: black;
+    stroke-linecap: round;
+    stroke-linejoin: miter;
+    stroke-opacity: 1;
+    stroke-width: 2;
+}
+
+.filled { fill: black; }
+
+.bg-filled { fill: white; }
+
+.start-arrow { marker-start: url(#arrow); }
+
+.end-arrow { marker-end: url(#arrow); }
+
+.start-arrow-reverse { marker-start: url(#arrow-reverse); }
+
+.end-arrow-reverse { marker-end: url(#arrow-reverse); }
+
+.start-dot { marker-start: url(#dot); }
+
+.end-dot { marker-end: url(#dot); }
+
+.start-big-dot { marker-start: url(#big-dot); }
+
+.end-big-dot { marker-end: url(#big-dot); }
+
+.start-O { marker-start: url(#O); }
+
+.end-O { marker-end: url(#O); }

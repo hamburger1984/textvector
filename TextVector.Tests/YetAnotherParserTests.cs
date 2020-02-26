@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Xunit;
+﻿using Xunit;
 
 namespace TextVector.Tests
 {
@@ -304,33 +303,94 @@ namespace TextVector.Tests
         }
 
         [Fact]
-        public void Svg_Arrows()
+        public void TrickyArrowsHorizontal()
         {
+            var expected = @"1 (0,0,<)
+1 (2,0,.)
+1 (2,1,')
+1 (4,1,>)
+";
             var lines = new[]
             {
-                "   |  >-->  <--<",
-                "<--|",
-                "   |-->",
-                ">--|",
-                "   |--<",
-                "<--|",
-                "   |-->",
-                ">--'"
+                "<-.",
+                "  '->",
             };
-            var p = new YetAnotherParser(lines);
-            File.WriteAllText("./arrows.svg", p.ParseToSvg());
+
+            TestLines(expected, lines);
         }
 
         [Fact]
-        public void Svg_TestBox()
+        public void TrickyArrowsVertical()
         {
-            var p = new YetAnotherParser(File.ReadAllLines("./Samples/testbox.txt"));
-            var content = p.ParseToSvg();
+            var expected = @"1 (3,0,|)
+1 (3,1,|)
+1.1 (3,2,')
+1.1 (6,2,>)
+1.2 (0,1,<)
+";
+            var lines = new[]
+            {
+                "   |",
+                "<--|",
+                "   '-->"
+            };
 
-            Assert.NotNull(content);
-
-            File.WriteAllText("./testbox.svg", content);
+            TestLines(expected, lines);
         }
 
+        [Fact]
+        public void List()
+        {
+            var expected = @"1 (1,1,+)
+1.1 (2,1,-)
+1.2 (1,2,+)
+1.2.1 (2,2,-)
+1.2.2 (1,3,+)
+1.2.2.1 (2,3,-)
+1.2.2.2 (1,8,+)
+1.2.2.2 (2,8,-)
+2 (4,4,+)
+2.1 (5,4,-)
+2.2 (4,5,+)
+2.2.1 (5,5,-)
+2.2.2 (4,6,')
+2.2.2 (5,6,-)
+";
+            var lines = new[]
+            {
+                " A",
+                " +- 1",
+                " +- 2",
+                " +- 3",
+                " |  +- 3.1",
+                " |  +- 3.2",
+                " |  '- 3.3",
+                " |",
+                " +- 4"
+            };
+            TestLines(expected, lines);
+        }
+
+        [Fact]
+        public void OLists()
+        {
+            var expected = @"1 (0,0,|)
+1 (0,1,o)
+1.1 (2,1,-)
+1.2 (0,2,o)
+1.2.1 (2,2,-)
+1.2.2 (0,3,o)
+1.2.2 (2,3,-)
+";
+            var lines = new[]
+            {
+                "|",
+                "o--A",
+                "o--B",
+                "o--C",
+            };
+            TestLines(expected, lines);
+
+        }
     }
 }
