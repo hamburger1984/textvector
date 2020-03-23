@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TextVector
+namespace TextVector.Parsing
 {
     public readonly struct Node
     {
@@ -11,6 +11,15 @@ namespace TextVector
             Nodes = new List<Node>();
         }
 
+        public static implicit operator Node((int x, int y, int figureId, char c, TraceDirection direction) nodeTuple)
+        {
+            return new Node(nodeTuple.x, nodeTuple.y, nodeTuple.figureId, nodeTuple.c, nodeTuple.direction);
+        }
+
+        // public static implicit operator Node?((int x, int y, int figureId, char c, TraceDirection direction) nodeTuple)
+        // {
+        //     return new Node(nodeTuple.x, nodeTuple.y, nodeTuple.figureId, nodeTuple.c, nodeTuple.direction);
+        // }
 
         public int X { get; }
         public int Y { get; }

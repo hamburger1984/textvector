@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TextVector
+namespace TextVector.Buffer
 {
     public class TextBuffer
     {
@@ -20,16 +20,16 @@ namespace TextVector
             _buffer = new char[(Height + 2 * Neighborhood) * _lineWidth];
             _figures = new int[(Height + 2 * Neighborhood) * _lineWidth];
 
-            Array.Fill(_buffer, '\0', 0, Neighborhood * _lineWidth);
-            Array.Fill(_buffer, '\0', (Height + Neighborhood) * _lineWidth, Neighborhood * _lineWidth);
+            //Array.Fill(_buffer, '\0', 0, Neighborhood * _lineWidth);
+            //Array.Fill(_buffer, '\0', (Height + Neighborhood) * _lineWidth, Neighborhood * _lineWidth);
 
             Array.Fill(_figures, int.MaxValue, 0, Neighborhood * _lineWidth);
             Array.Fill(_figures, int.MaxValue, (Height + Neighborhood) * _lineWidth, Neighborhood * _lineWidth);
 
             for (var y = 0; y < Height; y++)
             {
-                Array.Fill(_buffer, '\0', (y + Neighborhood) * _lineWidth, Neighborhood);
-                Array.Fill(_buffer, '\0', (y + 1 + Neighborhood) * _lineWidth - Neighborhood, Neighborhood);
+                //Array.Fill(_buffer, '\0', (y + Neighborhood) * _lineWidth, Neighborhood);
+                //Array.Fill(_buffer, '\0', (y + 1 + Neighborhood) * _lineWidth - Neighborhood, Neighborhood);
                 Array.Fill(_figures, int.MaxValue, (y + Neighborhood) * _lineWidth, Neighborhood);
                 Array.Fill(_figures, int.MaxValue, (y + 1 + Neighborhood) * _lineWidth - Neighborhood, Neighborhood);
                 var lineLength = lines[y].Length;

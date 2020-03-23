@@ -1,13 +1,10 @@
-﻿
-using System.IO;
+﻿using System.IO;
 using Xunit;
 
 namespace TextVector.Tests
 {
     public class SvgTests
     {
-
-
         [Fact]
         public void Svg_ArrowsHorizontal()
         {
@@ -33,7 +30,7 @@ namespace TextVector.Tests
 
             };
             var p = new YetAnotherParser(lines);
-            File.WriteAllText("./arrows_horizontal.svg", p.ParseToSvg());
+            p.ParseToSvg("./arrows_horizontal.svg");
         }
 
         [Fact]
@@ -46,20 +43,15 @@ namespace TextVector.Tests
                 "            ^  v"
             };
             var p = new YetAnotherParser(lines);
-            File.WriteAllText("./arrows_vertical.svg", p.ParseToSvg());
+            p.ParseToSvg("./arrows_vertical.svg");
         }
 
         [Fact]
         public void Svg_TestBox()
         {
             var p = new YetAnotherParser(File.ReadAllLines("./Samples/testbox.txt"));
-            var content = p.ParseToSvg();
-
-            Assert.NotNull(content);
-
-            File.WriteAllText("./testbox.svg", content);
+            p.ParseToSvg("./testbox.svg");
         }
-
     }
 
 }

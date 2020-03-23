@@ -3,25 +3,29 @@ using System.IO;
 using System.Reflection;
 using System.Xml.Linq;
 using Microsoft.Extensions.FileProviders;
+using TextVector.Parsing;
 
-namespace TextVector
+namespace TextVector.Writing
 {
-    public class SvgGenerator
+    public class SvgGenerator : IWriter
     {
         private const int SvgCellWidth = 12;
         private const int SvgCellHeight = 16;
+        private readonly int _height;
+        private readonly int _width;
+
         //private const int SvgHalfCellWidth = 3;
         //private const int SvgHalfCellHeight = 4;
 
         static SvgGenerator()
         {
-            (StyleCssContent, DefXmlContent) = LoadResources("svg_style.css", "svg_def.xml");
+            (StyleCssContent, DefXmlContent) = LoadResources("Writing.svg_style.css", "Writing.svg_def.xml");
         }
 
         private static string DefXmlContent { get; }
         private static string StyleCssContent { get; }
 
-        private static (string, string) LoadResources(string fileName1, string fileName2)
+        private static (string content1, string content2) LoadResources(string fileName1, string fileName2)
         {
             var embeddedProvider = new EmbeddedFileProvider(Assembly.GetExecutingAssembly());
             using var reader1 = new StreamReader(embeddedProvider.GetFileInfo(fileName1).CreateReadStream());
@@ -29,13 +33,31 @@ namespace TextVector
             return (reader1.ReadToEnd(), reader2.ReadToEnd());
         }
 
-        public string ToSvg(IEnumerable<Node> nodes, int width, int height)
+        public SvgGenerator(int width, int height)
+        {
+            _width = width;
+            _height = height;
+        }
+
+        public void WriteFile(IEnumerable<Node> figures, string filename)
+        {
+            var svgContent = ToSvg(figures);
+            if (!string.IsNullOrEmpty(filename))
+                File.WriteAllText(filename, svgContent);
+        }
+
+        public string WriteString(IEnumerable<Node> figures)
+        {
+            return ToSvg(figures);
+        }
+
+        private string ToSvg(IEnumerable<Node> nodes)
         {
             var doc = new XDocument();
             XNamespace ns = "http://www.w3.org/2000/svg";
             var svg = new XElement(ns + "svg",
-                new XAttribute("width", $"{SvgCellWidth * (width + 2)}"),
-                new XAttribute("height", $"{SvgCellHeight * (height + 2)}"));
+                new XAttribute("width", $"{SvgCellWidth * (_width + 2)}"),
+                new XAttribute("height", $"{SvgCellHeight * (_height + 2)}"));
             doc.Add(svg);
 
             var def = XElement.Parse(DefXmlContent);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TextVector
+namespace TextVector.Parsing
 {
     [Flags]
     public enum TraceDirection

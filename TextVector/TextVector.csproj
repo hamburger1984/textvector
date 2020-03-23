@@ -1,18 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="svg_def.xml" />
-    <None Remove="svg_style.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="svg_def.xml" />
-    <EmbeddedResource Include="svg_style.css" />
+    <EmbeddedResource Include="Writing/svg_def.xml" />
+    <EmbeddedResource Include="Writing/svg_style.css" />
   </ItemGroup>
 
   <ItemGroup>
