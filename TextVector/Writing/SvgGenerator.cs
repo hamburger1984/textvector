@@ -39,7 +39,7 @@ namespace TextVector.Writing
             _height = height;
         }
 
-        public void WriteFile(IEnumerable<Node> figures, string filename)
+        public void WriteFile(string filename, IEnumerable<Node> figures)
         {
             var svgContent = ToSvg(figures);
             if (!string.IsNullOrEmpty(filename))

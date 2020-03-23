@@ -24,7 +24,7 @@ namespace TextVector.Writing
             return result.ToString();
         }
 
-        public void WriteFile(IEnumerable<Node> figures, string filename)
+        public void WriteFile(string filename, IEnumerable<Node> figures)
         {
             var dump = WriteString(figures);
             if (!string.IsNullOrEmpty(filename))

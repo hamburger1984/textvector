@@ -23,7 +23,7 @@ namespace TextVector
         public void ParseToSvg(string filename)
         {
             var writer = new SvgGenerator(_buffer.Width, _buffer.Height);
-            writer.WriteFile(ParseFigures(), filename);
+            writer.WriteFile(filename, ParseFigures());
         }
 
         private IEnumerable<Node> ParseFigures()

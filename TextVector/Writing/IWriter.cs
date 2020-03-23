@@ -6,6 +6,6 @@ namespace TextVector.Writing
     public interface IWriter
     {
         string WriteString(IEnumerable<Node> figures);
-        void WriteFile(IEnumerable<Node> figures, string filename);
+        void WriteFile(string filename, IEnumerable<Node> figures);
     }
 }

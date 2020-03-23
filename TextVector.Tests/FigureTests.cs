@@ -1,15 +1,19 @@
-﻿using Xunit;
+﻿using TextVector.Buffer;
+using TextVector.Parsing;
+using TextVector.Writing;
+using Xunit;
 
 namespace TextVector.Tests
 {
-    public class YetAnotherParserTests
+    public class FigureTests
     {
         private void TestLines(string expected, params string[] lines)
         {
-            var p = new YetAnotherParser(lines);
+            var buffer = new TextBuffer(lines);
+            var figures = new FigureParser(buffer).Parse();
+            var dump = new TextDumper().WriteString(figures);
 
-            var parsed = p.ParseToText();
-            Assert.Equal(expected, parsed);
+            Assert.Equal(expected, dump);
         }
 
         [Fact]

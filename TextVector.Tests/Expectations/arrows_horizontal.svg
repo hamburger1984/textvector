@@ -1,0 +1,99 @@
+<svg width="228" height="304" xmlns="http://www.w3.org/2000/svg">
+  <def xmlns="http://www.w3.org/2000/svg">
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path class="filled" d="M1,2 L8,5 L1,8 z" />
+    </marker>
+    <marker id="arrow-reverse" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path class="filled" d="M2,5 L8,2 L8,8 z" />
+    </marker>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <circle class="filled" cx="5" cy="5" r="3" />
+    </marker>
+    <marker id="big-dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <circle class="filled" cx="5" cy="5" r="4" />
+    </marker>
+    <marker id="O" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <circle class="bg-filled" cx="5" cy="5" r="3" />
+    </marker>
+  </def>
+  <style type="text/css"><![CDATA[line, path, circle, rect, polygon {
+    fill: none;
+    fill-opacity: 1;
+    stroke: black;
+    stroke-linecap: round;
+    stroke-linejoin: miter;
+    stroke-opacity: 1;
+    stroke-width: 2;
+}
+
+.filled { fill: black; }
+
+.bg-filled { fill: white; }
+
+.start-arrow { marker-start: url(#arrow); }
+
+.end-arrow { marker-end: url(#arrow); }
+
+.start-arrow-reverse { marker-start: url(#arrow-reverse); }
+
+.end-arrow-reverse { marker-end: url(#arrow-reverse); }
+
+.start-dot { marker-start: url(#dot); }
+
+.end-dot { marker-end: url(#dot); }
+
+.start-big-dot { marker-start: url(#big-dot); }
+
+.end-big-dot { marker-end: url(#big-dot); }
+
+.start-O { marker-start: url(#O); }
+
+.end-O { marker-end: url(#O); }
+]]></style>
+  <g id="figure1">
+    <line class=" " x1="48" y1="16" x2="48" y2="32" />
+    <line class=" " x1="48" y1="32" x2="48" y2="48" />
+    <line class=" end-arrow" x1="48" y1="48" x2="84" y2="48" />
+    <line class=" " x1="48" y1="48" x2="48" y2="64" />
+    <line class=" " x1="48" y1="64" x2="48" y2="80" />
+    <line class=" end-arrow-reverse" x1="48" y1="80" x2="84" y2="80" />
+    <line class=" end-arrow-reverse" x1="48" y1="64" x2="12" y2="64" />
+    <line class=" end-arrow" x1="48" y1="32" x2="12" y2="32" />
+  </g>
+  <g id="figure2">
+    <line class="start-arrow-reverse end-arrow" x1="84" y1="16" x2="120" y2="16" />
+  </g>
+  <g id="figure3">
+    <line class="start-arrow end-arrow-reverse" x1="156" y1="16" x2="192" y2="16" />
+  </g>
+  <g id="figure4">
+    <line class="start-arrow " x1="132" y1="48" x2="168" y2="48" />
+    <line class=" " x1="168" y1="48" x2="168" y2="64" />
+    <line class=" end-arrow" x1="168" y1="64" x2="204" y2="64" />
+  </g>
+  <g id="figure5">
+    <line class="start-arrow-reverse " x1="24" y1="112" x2="60" y2="112" />
+    <line class=" end-arrow-reverse" x1="60" y1="112" x2="96" y2="112" />
+    <line class=" " x1="60" y1="112" x2="60" y2="144" />
+    <line class=" end-arrow" x1="60" y1="144" x2="84" y2="144" />
+    <line class=" end-arrow" x1="60" y1="144" x2="36" y2="144" />
+  </g>
+  <g id="figure6">
+    <line class=" " x1="48" y1="176" x2="48" y2="192" />
+    <line class=" " x1="48" y1="192" x2="48" y2="208" />
+    <line class=" end-arrow" x1="48" y1="208" x2="84" y2="208" />
+    <line class=" end-arrow" x1="48" y1="192" x2="12" y2="192" />
+  </g>
+  <g id="figure7">
+    <line class=" end-dot" x1="12" y1="240" x2="12" y2="256" />
+    <line class="start-dot end-dot" x1="12" y1="256" x2="48" y2="256" />
+    <line class="start-dot end-dot" x1="12" y1="256" x2="12" y2="272" />
+    <line class="start-dot " x1="12" y1="272" x2="36" y2="272" />
+  </g>
+  <g id="figure8">
+    <line class=" end-O" x1="84" y1="240" x2="84" y2="256" />
+    <line class="start-O end-O" x1="84" y1="256" x2="120" y2="256" />
+    <line class="start-O end-O" x1="84" y1="256" x2="84" y2="272" />
+    <line class="start-O end-big-dot" x1="84" y1="272" x2="144" y2="272" />
+  </g>
+</svg>
