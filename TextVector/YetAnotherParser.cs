@@ -26,7 +26,7 @@ namespace TextVector
             writer.WriteFile(filename, ParseFigures());
         }
 
-        private IEnumerable<Node> ParseFigures()
+        private IEnumerable<Figure> ParseFigures()
         {
             return new FigureParser(_buffer).Parse();
         }

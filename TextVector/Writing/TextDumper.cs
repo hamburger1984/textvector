@@ -7,7 +7,7 @@ namespace TextVector.Writing
 {
     public class TextDumper : IWriter
     {
-        private void DumpGraph(StringBuilder sb, Node node, string suffix = "")
+        private void DumpGraph(StringBuilder sb, Figure node, string suffix = "")
         {
             sb.AppendLine($"{node.FigureId}{suffix} ({node.X},{node.Y},{node.C})");
 
@@ -17,14 +17,14 @@ namespace TextVector.Writing
                 DumpGraph(sb, n, isFork ? $"{suffix}.{i++}" : suffix);
         }
 
-        public string WriteString(IEnumerable<Node> figures)
+        public string WriteString(IEnumerable<Figure> figures)
         {
             var result = new StringBuilder();
             foreach (var figure in figures) DumpGraph(result, figure);
             return result.ToString();
         }
 
-        public void WriteFile(string filename, IEnumerable<Node> figures)
+        public void WriteFile(string filename, IEnumerable<Figure> figures)
         {
             var dump = WriteString(figures);
             if (!string.IsNullOrEmpty(filename))

@@ -39,19 +39,19 @@ namespace TextVector.Writing
             _height = height;
         }
 
-        public void WriteFile(string filename, IEnumerable<Node> figures)
+        public void WriteFile(string filename, IEnumerable<Figure> figures)
         {
             var svgContent = ToSvg(figures);
             if (!string.IsNullOrEmpty(filename))
                 File.WriteAllText(filename, svgContent);
         }
 
-        public string WriteString(IEnumerable<Node> figures)
+        public string WriteString(IEnumerable<Figure> figures)
         {
             return ToSvg(figures);
         }
 
-        private string ToSvg(IEnumerable<Node> nodes)
+        private string ToSvg(IEnumerable<Figure> nodes)
         {
             var doc = new XDocument();
             XNamespace ns = "http://www.w3.org/2000/svg";
@@ -130,7 +130,7 @@ namespace TextVector.Writing
         //    //);
         //}
 
-        private void NodeToSvg(XContainer el, XNamespace ns, Node node)
+        private void NodeToSvg(XContainer el, XNamespace ns, Figure node)
         {
             var startCap = SvgLineCap(node.C, true, node.Direction);
             foreach (var dest in node.Nodes)

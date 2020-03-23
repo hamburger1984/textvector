@@ -29,7 +29,7 @@ namespace TextVector.Parsing
             _buffer = buffer;
         }
 
-        public IEnumerable<Node> Parse()
+        public IEnumerable<Figure> Parse()
         {
             var figureId = 1;
             var defaultDirection = TraceDirection.Horizontal | TraceDirection.Right;
@@ -41,7 +41,7 @@ namespace TextVector.Parsing
                     var c = _buffer[x, y];
                     if (LineChars.Contains(c))
                     {
-                        Node node = (x, y, figureId, c, defaultDirection);
+                        Figure node = (x, y, figureId, c, defaultDirection);
                         TraceFrom(node, defaultDirection);
 
                         if (node.Nodes.Any())
@@ -53,7 +53,7 @@ namespace TextVector.Parsing
                 }
         }
 
-        private void TraceFrom(Node node, TraceDirection direction)
+        private void TraceFrom(Figure node, TraceDirection direction)
         {
             foreach (var nextDirection in LinesFrom(node.X, node.Y, node.FigureId, node.C, direction))
             {
@@ -68,7 +68,7 @@ namespace TextVector.Parsing
             }
         }
 
-        private Node? TraceDirectionalLine(int x, int y, int figureId, TraceDirection direction)
+        private Figure? TraceDirectionalLine(int x, int y, int figureId, TraceDirection direction)
         {
             var down = direction.HasFlag(TraceDirection.Down);
             var right = direction.HasFlag(TraceDirection.Right);
