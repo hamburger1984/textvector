@@ -1,4 +1,6 @@
-﻿using TextVector.Buffer;
+﻿using System.Collections.Generic;
+using System.Linq;
+using TextVector.Buffer;
 using TextVector.Parsing;
 using TextVector.Writing;
 using Xunit;
@@ -11,7 +13,7 @@ namespace TextVector.Tests
         {
             var buffer = new TextBuffer(lines);
             var figures = new FigureParser(buffer).Parse();
-            var dump = new TextDumper().WriteString(figures);
+            var dump = new TextDumper().WriteString(figures, Enumerable.Empty<Text>());
 
             Assert.Equal(expected, dump);
         }
@@ -394,7 +396,20 @@ namespace TextVector.Tests
                 "o--C",
             };
             TestLines(expected, lines);
+        }
 
+
+        [Fact]
+        public void IgnoreText()
+        {
+            // TODO: fixme!
+            var lines = new[] {
+                "Who's there? --->",
+                "...." +
+                "-->"
+            };
+            var expected = "1 (13,0,-)\n1 (16,0,>)\n2 (0,2,-)\n2 (2,2,>)\n";
+            TestLines(expected, lines); ;
         }
     }
 }

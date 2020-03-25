@@ -39,19 +39,19 @@ namespace TextVector.Writing
             _height = height;
         }
 
-        public void WriteFile(string filename, IEnumerable<Figure> figures)
+        public void WriteFile(string filename, IEnumerable<Figure> figures, IEnumerable<Text> texts)
         {
-            var svgContent = ToSvg(figures);
+            var svgContent = ToSvg(figures, texts);
             if (!string.IsNullOrEmpty(filename))
                 File.WriteAllText(filename, svgContent);
         }
 
-        public string WriteString(IEnumerable<Figure> figures)
+        public string WriteString(IEnumerable<Figure> figures, IEnumerable<Text> texts)
         {
-            return ToSvg(figures);
+            return ToSvg(figures, texts);
         }
 
-        private string ToSvg(IEnumerable<Figure> nodes)
+        private string ToSvg(IEnumerable<Figure> nodes, IEnumerable<Text> texts)
         {
             var doc = new XDocument();
             XNamespace ns = "http://www.w3.org/2000/svg";

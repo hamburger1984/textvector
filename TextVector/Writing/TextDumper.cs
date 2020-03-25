@@ -17,16 +17,22 @@ namespace TextVector.Writing
                 DumpGraph(sb, n, isFork ? $"{suffix}.{i++}" : suffix);
         }
 
-        public string WriteString(IEnumerable<Figure> figures)
+        public string WriteString(IEnumerable<Figure> figures, IEnumerable<Text> texts)
         {
             var result = new StringBuilder();
             foreach (var figure in figures) DumpGraph(result, figure);
+            foreach (var text in texts) DumpText(result, text);
             return result.ToString();
         }
 
-        public void WriteFile(string filename, IEnumerable<Figure> figures)
+        private void DumpText(StringBuilder sb, Text text)
         {
-            var dump = WriteString(figures);
+            sb.AppendLine($"{text.TextId} ({text.X},{text.Y},{text.Value})");
+        }
+
+        public void WriteFile(string filename, IEnumerable<Figure> figures, IEnumerable<Text> texts)
+        {
+            var dump = WriteString(figures, texts);
             if (!string.IsNullOrEmpty(filename))
                 File.WriteAllText(filename, dump);
         }

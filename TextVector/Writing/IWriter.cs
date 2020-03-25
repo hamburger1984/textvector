@@ -5,7 +5,7 @@ namespace TextVector.Writing
 {
     public interface IWriter
     {
-        string WriteString(IEnumerable<Figure> figures);
-        void WriteFile(string filename, IEnumerable<Figure> figures);
+        string WriteString(IEnumerable<Figure> figures, IEnumerable<Text> texts);
+        void WriteFile(string filename, IEnumerable<Figure> figures, IEnumerable<Text> texts);
     }
 }

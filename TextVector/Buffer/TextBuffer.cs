@@ -10,6 +10,7 @@ namespace TextVector.Buffer
         private readonly int _lineWidth;
         private const int Neighborhood = 1;
         private readonly int[] _figures;
+        private int nextId = 1;
 
         public TextBuffer(IReadOnlyList<string> lines)
         {
@@ -51,9 +52,27 @@ namespace TextVector.Buffer
             return (Neighborhood + y) * _lineWidth + Neighborhood + x;
         }
 
+        public IEnumerable<(int x, char c, bool isTaken)> GetLine(int y)
+        {
+
+            if (y < 0 || y >= Height) throw new ArgumentOutOfRangeException(nameof(y));
+
+            var start = ToIndex(0, y);
+            for (var x = 0; x < Width; x++)
+            {
+                yield return (x, _buffer[start + x], _figures[start + x] != 0);
+            }
+        }
+
+
         public int IsFigure(int x, int y)
         {
             return _figures[ToIndex(x, y)];
+        }
+
+        public int NextFigureId()
+        {
+            return nextId++;
         }
 
         public void SetFigure(int x, int y, int figureId)

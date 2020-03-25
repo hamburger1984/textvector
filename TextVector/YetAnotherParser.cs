@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using TextVector.Buffer;
 using TextVector.Parsing;
 using TextVector.Writing;
@@ -17,13 +18,13 @@ namespace TextVector
         public string ParseToText()
         {
             var writer = new TextDumper();
-            return writer.WriteString(ParseFigures());
+            return writer.WriteString(ParseFigures(), Enumerable.Empty<Text>());
         }
 
         public void ParseToSvg(string filename)
         {
             var writer = new SvgGenerator(_buffer.Width, _buffer.Height);
-            writer.WriteFile(filename, ParseFigures());
+            writer.WriteFile(filename, ParseFigures(), Enumerable.Empty<Text>());
         }
 
         private IEnumerable<Figure> ParseFigures()

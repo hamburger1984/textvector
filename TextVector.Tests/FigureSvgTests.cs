@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using FluentAssertions;
 using TextVector.Buffer;
 using TextVector.Parsing;
@@ -18,7 +19,7 @@ namespace TextVector.Tests
             var figures = new FigureParser(buffer).Parse();
 
             var svgGen = new SvgGenerator(buffer.Width, buffer.Height);
-            svgGen.WriteFile(outputFile, figures);
+            svgGen.WriteFile(outputFile, figures, Enumerable.Empty<Text>());
 
             File.Exists(outputFile).Should().BeTrue($"Output should exist at {outputFile}.");
             File.Exists(expectedFile).Should().BeTrue($"Reference svg should exist at {expectedFile}.");
