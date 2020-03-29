@@ -12,7 +12,7 @@ namespace TextVector.Tests
     {
         private void SvgRenderAndCompare(string[] lines, string expectedFile)
         {
-            var outputFile = "test.svg";
+            var outputFile = "Test_" + Path.GetFileName(expectedFile);
             if (File.Exists(outputFile)) File.Delete(outputFile);
 
             var buffer = new TextBuffer(lines);

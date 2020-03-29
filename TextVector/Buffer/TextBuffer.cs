@@ -52,6 +52,8 @@ namespace TextVector.Buffer
             return (Neighborhood + y) * _lineWidth + Neighborhood + x;
         }
 
+        private const int TextPremarked = int.MaxValue - 1;
+
         public IEnumerable<(int x, char c, bool isTaken)> GetLine(int y)
         {
 
@@ -60,7 +62,8 @@ namespace TextVector.Buffer
             var start = ToIndex(0, y);
             for (var x = 0; x < Width; x++)
             {
-                yield return (x, _buffer[start + x], _figures[start + x] != 0);
+                var figureId = _figures[start + x];
+                yield return (x, _buffer[start + x], figureId != 0 && figureId != TextPremarked);
             }
         }
 
@@ -78,6 +81,11 @@ namespace TextVector.Buffer
         public int UseNextId()
         {
             return ++lastId;
+        }
+
+        public void PreMarkText(int x, int y)
+        {
+            _figures[ToIndex(x, y)] = TextPremarked;
         }
 
         public void SetFigure(int x, int y, int figureId)

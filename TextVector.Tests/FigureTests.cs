@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using TextVector.Buffer;
 using TextVector.Parsing;
 using TextVector.Writing;
@@ -12,8 +11,11 @@ namespace TextVector.Tests
         private void TestLines(string expected, params string[] lines)
         {
             var buffer = new TextBuffer(lines);
-            var figures = new FigureParser(buffer).Parse();
-            var dump = new TextDumper().WriteString(figures, Enumerable.Empty<Text>());
+            var textParser = new TextParser(buffer);
+            textParser.PreMarkText();
+            var figures = new FigureParser(buffer).Parse().ToList();
+            var texts = textParser.Parse().ToList();
+            var dump = new TextDumper().WriteString(figures, texts);
 
             Assert.Equal(expected, dump);
         }
@@ -361,6 +363,14 @@ namespace TextVector.Tests
 2.2.1 (5,5,-)
 2.2.2 (4,6,')
 2.2.2 (5,6,-)
+3 (1,0,A)
+4 (4,1,1)
+5 (4,2,2)
+6 (4,3,3)
+7 (7,4,3.1)
+8 (7,5,3.2)
+9 (7,6,3.3)
+10 (4,8,4)
 ";
             var lines = new[]
             {
@@ -387,6 +397,9 @@ namespace TextVector.Tests
 1.2.1 (2,2,-)
 1.2.2 (0,3,o)
 1.2.2 (2,3,-)
+2 (3,1,A)
+3 (3,2,B)
+4 (3,3,C)
 ";
             var lines = new[]
             {
@@ -402,13 +415,21 @@ namespace TextVector.Tests
         [Fact]
         public void IgnoreText()
         {
-            // TODO: fixme!
             var lines = new[] {
                 "Who's there? --->",
-                "...." +
+                "....",
                 "-->"
             };
-            var expected = "1 (13,0,-)\n1 (16,0,>)\n2 (0,2,-)\n2 (2,2,>)\n";
+            var expected = @"1 (13,0,-)
+1 (16,0,>)
+2 (0,2,-)
+2.1 (0,1,.)
+2.2 (1,2,-)
+2.2.1 (1,1,.)
+2.2.2 (2,2,>)
+2.2.2 (2,1,.)
+3 (0,0,Who's there?)
+";
             TestLines(expected, lines); ;
         }
     }

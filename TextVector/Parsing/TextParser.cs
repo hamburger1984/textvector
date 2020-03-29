@@ -16,6 +16,29 @@ namespace TextVector.Parsing
             _buffer = buffer;
         }
 
+        public void PreMarkText()
+        {
+            var currentText = new StringBuilder();
+            for (var y = 0; y < _buffer.Height; y++)
+            {
+                var lastWordChar = 0;
+                foreach (var (x, c, taken) in _buffer.GetLine(y))
+                {
+                    if (char.IsLetterOrDigit(c))
+                    {
+                        if (lastWordChar == x - 1)
+                        {
+                            _buffer.PreMarkText(x, y);
+                            if (x == 1)
+                                _buffer.PreMarkText(0, y);
+                        }
+                        lastWordChar = x;
+                    }
+
+                }
+            }
+        }
+
         public IEnumerable<Text> Parse()
         {
             var currentText = new StringBuilder();
@@ -36,7 +59,7 @@ namespace TextVector.Parsing
                     {
                         if (currentText.Length > 0)
                         {
-                            Console.WriteLine($"TAKEN {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
+                            // Console.WriteLine($"TAKEN {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
                             yield return CreateText(x, y, currentText);
                             last = (0, 0, 0);
                         }
@@ -70,7 +93,7 @@ namespace TextVector.Parsing
                         last = (0, last.white + 1, 0);
                         if (last.white > 1)
                         {
-                            Console.WriteLine($"WHITE {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
+                            // Console.WriteLine($"WHITE {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
                             yield return CreateText(x + 1, y, currentText);
                             last = (0, 0, 0);
                         }
@@ -83,7 +106,7 @@ namespace TextVector.Parsing
                         last = (0, 0, last.punct + 1);
                         if (last.punct > 1)
                         {
-                            Console.WriteLine($"PUNCT {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
+                            // Console.WriteLine($"PUNCT {x}[{c}] -> '{currentText.ToString()}' ({currentText.Length})");
                             yield return CreateText(x + 1, y, currentText);
                             last = (0, 0, 0);
                         }
@@ -92,15 +115,10 @@ namespace TextVector.Parsing
 
                 if (currentText.Length > 0)
                 {
-                    Console.WriteLine($"END {x} -> '{currentText.ToString()}' ({currentText.Length})");
+                    // Console.WriteLine($"END {x} -> '{currentText.ToString()}' ({currentText.Length})");
                     yield return CreateText(x + 1, y, currentText);
                 }
             }
-            // foreach line
-            // if cell is not part of figure, yet
-            // collect word chars, tolerating single non-word chars
-            // create new text entity
-            // continue until all cells checked.
         }
 
         private Text CreateText(int x, int y, StringBuilder builder)

@@ -84,6 +84,25 @@ namespace TextVector.Writing
                 //svg.Add(path);
             }
 
+            foreach (var text in texts)
+            {
+                // svg.Add(new XElement(ns + "circle",
+                //     new XAttribute("cx", (text.X + 1) * SvgCellWidth),
+                //     new XAttribute("cy", (text.Y + 1) * SvgCellHeight),
+                //     new XAttribute("r", SvgCellHeight / 2)
+                // ));
+
+                var t = new XElement(ns + "text",
+                new XAttribute("id", $"text{text.TextId}"),
+                    new XAttribute("x", (text.X + .5) * SvgCellWidth),
+                    new XAttribute("y", (text.Y + 1) * SvgCellHeight),
+                    new XAttribute("dominant-baseline", "middle"),
+                    text.Value
+                );
+
+                svg.Add(t);
+            }
+
             return doc.ToString();
         }
 

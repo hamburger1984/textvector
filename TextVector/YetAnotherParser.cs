@@ -18,18 +18,24 @@ namespace TextVector
         public string ParseToText()
         {
             var writer = new TextDumper();
-            return writer.WriteString(ParseFigures(), Enumerable.Empty<Text>());
+            var (figures, texts) = Parse();
+            return writer.WriteString(figures, texts);
         }
 
         public void ParseToSvg(string filename)
         {
             var writer = new SvgGenerator(_buffer.Width, _buffer.Height);
-            writer.WriteFile(filename, ParseFigures(), Enumerable.Empty<Text>());
+            var (figures, texts) = Parse();
+            writer.WriteFile(filename, figures, texts);
         }
 
-        private IEnumerable<Figure> ParseFigures()
+        private (IEnumerable<Figure> figures, IEnumerable<Text> texts) Parse()
         {
-            return new FigureParser(_buffer).Parse();
+            var textParser = new TextParser(_buffer);
+            textParser.PreMarkText();
+            var figures = new FigureParser(_buffer).Parse().ToList();
+            var texts = textParser.Parse().ToList();
+            return (figures, texts);
         }
     }
 }

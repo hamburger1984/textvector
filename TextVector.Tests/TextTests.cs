@@ -1,4 +1,5 @@
-﻿using TextVector.Buffer;
+﻿using System.Linq;
+using TextVector.Buffer;
 using TextVector.Parsing;
 using TextVector.Writing;
 using Xunit;
@@ -10,8 +11,10 @@ namespace TextVector.Tests
         private void TestLines(string expected, params string[] lines)
         {
             var buffer = new TextBuffer(lines);
-            var figures = new FigureParser(buffer).Parse();
-            var texts = new TextParser(buffer).Parse();
+            var textParser = new TextParser(buffer);
+            textParser.PreMarkText();
+            var figures = new FigureParser(buffer).Parse().ToList();
+            var texts = textParser.Parse().ToList();
             var dump = new TextDumper().WriteString(figures, texts);
 
             Assert.Equal(expected, dump);
@@ -50,12 +53,13 @@ namespace TextVector.Tests
         }
 
 
-        //[Fact]
-        public void FirstText()
+        [Fact]
+        public void Mixed_FiguresAndText()
         {
             var lines = new[]
             {
-                "Knock, knock.  *----> Who is there?",
+                "Knock, knock.. *----> Who is there?",
+                "",
                 "--.  asdf  .----",
                 "  |  qwert |",
                 "  v        v",
@@ -64,22 +68,19 @@ namespace TextVector.Tests
 
             var expected = @"1 (15,0,*)
 1 (20,0,>)
-2 (0,1,-)
-2 (2,1,.)
-2 (2,3,v)
-3 (11,1,.)
-3.1 (12,1,-)
-3.1.1 (12,0,.)
-3.1.2 (13,1,-)
-3.1.2.1 (13,0,.)
-3.1.2.2 (15,1,-)
-3.2 (11,3,v)
-4 (0,0,Knock, knock)
-5 (21,0,Who is there?)
-6 (5,1,asdf)
-7 (5,2,qwert)
-8 (1,4,ab)
-9 (4,4,cd)
+2 (0,2,-)
+2 (2,2,.)
+2 (2,4,v)
+3 (11,2,.)
+3.1 (15,2,-)
+3.2 (11,4,v)
+4 (0,0,Knock, knock..)
+5 (22,0,Who is there?)
+6 (5,2,asdf)
+7 (5,3,qwert)
+8 (1,5,ab)
+9 (5,5,cd)
+10 (9,5,ef-gh)
 ";
 
             TestLines(expected, lines);
