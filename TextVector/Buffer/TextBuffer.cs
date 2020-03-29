@@ -10,7 +10,7 @@ namespace TextVector.Buffer
         private readonly int _lineWidth;
         private const int Neighborhood = 1;
         private readonly int[] _figures;
-        private int nextId = 1;
+        private int lastId = 0;
 
         public TextBuffer(IReadOnlyList<string> lines)
         {
@@ -70,9 +70,14 @@ namespace TextVector.Buffer
             return _figures[ToIndex(x, y)];
         }
 
-        public int NextFigureId()
+        public int PeekNextId()
         {
-            return nextId++;
+            return lastId + 1;
+        }
+
+        public int UseNextId()
+        {
+            return ++lastId;
         }
 
         public void SetFigure(int x, int y, int figureId)

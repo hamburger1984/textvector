@@ -31,7 +31,7 @@ namespace TextVector.Parsing
 
         public IEnumerable<Figure> Parse()
         {
-            var figureId = _buffer.NextFigureId();
+            var figureId = _buffer.PeekNextId();
             var defaultDirection = TraceDirection.Horizontal | TraceDirection.Right;
             for (var y = 0; y < _buffer.Height; y++)
                 for (var x = 0; x < _buffer.Width; x++)
@@ -46,8 +46,9 @@ namespace TextVector.Parsing
 
                         if (node.Nodes.Any())
                         {
+                            _buffer.UseNextId();
                             yield return node;
-                            figureId = _buffer.NextFigureId();
+                            figureId = _buffer.PeekNextId();
                         }
                     }
                 }
