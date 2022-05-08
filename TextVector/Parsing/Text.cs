@@ -14,6 +14,5 @@ namespace TextVector.Parsing
         public int Y { get; }
         public int TextId { get; }
         public string Value { get; }
-
     }
 }

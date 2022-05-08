@@ -188,7 +188,7 @@ namespace TextVector.Writing
         //}
 
 
-        private string? SvgLineCap(char c, bool start, TraceDirection direction)
+        private static string? SvgLineCap(char c, bool start, TraceDirection direction)
         {
             var prefix = start ? "start-" : "end-";
 

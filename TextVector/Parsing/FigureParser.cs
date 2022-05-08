@@ -110,7 +110,7 @@ namespace TextVector.Parsing
             return TraceDirectionalLine(x, y, figureId, direction) ?? (x, y, figureId, next, direction);
         }
 
-        private bool ContinueTracing(char next, bool down, bool right, bool horizontal, bool vertical)
+        private static bool ContinueTracing(char next, bool down, bool right, bool horizontal, bool vertical)
         {
             if (horizontal)
                 return next == TraceContinueHorizontal;
@@ -123,7 +123,7 @@ namespace TextVector.Parsing
         }
 
 
-        private bool RequiresNode(char next, bool down, bool horizontal, bool vertical)
+        private static bool RequiresNode(char next, bool down, bool horizontal, bool vertical)
         {
             if (horizontal)
                 return TraceNodesHorizontal.Contains(next);
